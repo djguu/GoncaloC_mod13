@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" href="images/icon.ico">
+
+    <title>TeixeiraChat Admin</title>
+
+    <!--javascript files-->
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+
+    <!--css files-->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/application.css">
+    <style>
+        #users {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        #users li {
+            padding: 5px 10px;
+        }
+        
+        #users li:nth-child(odd) {
+            background: #eee;
+        }
+        
+        .rooms,
+        .form-group {
+            float: left;
+        }
+        
+        .clearfix {
+            clear: both
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid" style="color: #337ab7">
+        <div id="wrapTotal" class=" col-md-12 mywrapper ">
+            <div class="meuheader"></div>
+            <div id="users" class="rooms col-xs-5 col-xs-offset-3"></div>
+            <form class="form-group col-xs-5 col-xs-offset-1">
+                Inserir novo user:<br><br>
+                <input type="text" id="user1" placeholder="Username" /><br><br>
+                <input type="password" id="pass1" placeholder="Password" /><br><br>
+                <button type="button" class="btn-lg" id="Inserir">Inserir</button>
+            </form>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+    </div>
+</body>
+<script>
+    $(document).ready(function() {
+        $(".meuheader").load("header.html");
+
+        //tornar o div draggable
+        $("#users").draggable({
+            containment: "#WrapTotal",
+            scroll: false,
+
+            axis: "x"
+        });
+
+        //---------------------------
+        //Criar administradores
+        $("body").on('click', "#Inserir", function() {
+                if ($("#user1").val() != "" && $("#pass1").val() != "") {
+                    $.ajax({
+                        url: "php/addadmins",
+                        dataType: 'json',
+                        data: {
+                            user: $("#user1").val(),
+                            pass: $("#pass1").val()
+                        },
+                        type: "POST",
+                        error: function() {
+                            console.log('erro')
+                        },
+                        success: function(data) {
+                            if (data) {
+                                location.reload();
+                            } else {
+                                alert("ja existe um user com esse nome!");
+                                $("#user1").val("");
+                                $("#pass1").val("");
+                            }
+                        }
+                    })
+                } else {
+                    alert("insira todos os campos!");
+                }
+            })
+            //---------------------------
+
+        //---------------------------
+        //Apagar administrador
+        $("body").on('click', ".buttonDel", function() {
+            $.ajax({
+                url: "php/deleteadmins",
+                dataType: 'json',
+                data: {
+                    user: $(this).parent().attr('id')
+                },
+                type: "POST",
+                error: function() {
+                    console.log('erro')
+                },
+                success: function(data) {
+                    alert(data);
+                    location.reload();
+                }
+            })
+        });
+        //---------------------------
+
+        //---------------------------
+        //Carrega lista de admins
+        $.ajax({
+            url: "php/admins",
+            dataType: 'json',
+            error: function() {
+                console.log('erro')
+            },
+            success: function(data) {
+                var texto = '<button class="buttonDel btn-danger">x</button>&nbsp;&nbsp;';
+                $.each(data, function(index, value) {
+                    $("#users").append('<li id="' + value + '">' + texto + value + '</li>');
+                })
+            }
+        });
+        //---------------------------
+
+    });
+</script>
+
+</html>

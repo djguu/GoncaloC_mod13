@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" href="images/icon.ico">
+
+    <title>TeixeiraChat Admin</title>
+
+    <!--javascript files-->
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/blast.min.js"></script>
+
+    <!--css files-->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/application.css">
+    <link rel="stylesheet" href="css/blast.min.css" />
+
+    <style>
+        #roomlist {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        li {
+            list-style-type: none;
+        }
+        
+        #roomlist li {
+            padding: 5px 10px;
+            border: 20px;
+        }
+        
+        #roomlist li:hover {
+            cursor: pointer
+        }
+        
+        #roomlist .ui-selected {
+            background: #337ab7;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid" style="color: #337ab7">
+        <div class="col-md-12 mywrapper ">
+            <div class="meuheader"></div>
+            <div class="row">
+                <div data-blast="bgColor" class="rooms" id="roomlist"></div>
+                <div data-blast="bgColor" class="rooms extra" id="users"></div>
+            </div>
+        </div>
+    </div>
+
+    <!--Retirado do site:-->
+    <!--https://github.com/menemelkatan/Blast.js-->
+    <colorsBox>
+        <icon>≡</icon>
+        <div class="blast-frame">
+            <p>change colors</p>
+            <div class="blast-colors">
+                <div class="blast-color">#3D261A</div>
+                <div class="blast-color">#B6B254</div>
+                <div class="blast-color">#6B2E56</div>
+                <div class="blast-color">#48A871</div>
+                <div class="blast-color">#2D1D44</div>
+                <div class="blast-color">#3F4E92</div>
+                <div class="blast-color">#DCC218</div>
+                <div class="blast-color">#F5005E</div>
+                <div class="blast-color">#916E30</div>
+                <div class="blast-color">#D0A571</div>
+                <div class="blast-color">#379AA4</div>
+                <div class="blast-color">#216348</div>
+                <div class="blast-color">#3B3B3B</div>
+                <div class="blast-color">#CF2626
+                    <!-- you can change the color by type it's name or code here -->
+                </div>
+            </div>
+            <p class="blast-custom-colors">Custom colors</p>
+            <input type="color" name="blastCustomColor" value="#cf2626">
+        </div>
+    </colorsBox>
+</body>
+<script>
+    $(document).ready(function() {
+        $(".meuheader").load("header.html");
+        $(".rooms").addClass("col-xs-5 col-xs-offset-2");
+
+        document.getElementById("users").style.display = "none";
+
+        //------------------------------------
+        //Seleciona a Room desejada
+        //Carrega lista users
+        $(function() {
+            $("#roomlist").selectable({
+                stop: function(event, ui) {
+                    document.getElementById("users").style.display = "none";
+
+                    $(event.target).children('.ui-selected').not(':first').removeClass('ui-selected');
+                    var valorRoom = $(".ui-selected").text();
+                    $.ajax({
+                        url: "php/usersRooms",
+                        dataType: "json",
+                        type: "POST",
+                        data: {
+                            roomnb: valorRoom
+                        },
+                        error: function() {
+                            console.log('erro')
+                        },
+                        success: function(data) {
+                            document.getElementById("users").innerHTML = '';
+                            var texto = '<img src="images/on.png" alt="icon" style="width:10px;height:10px;">&nbsp;&nbsp;';
+                            $.each(data, function(index, value) {
+                                $("#users").append('<li id="' + value + '">' + texto + value + '</li>');
+                            })
+
+                            $("#users").fadeIn();
+
+                        }
+                    })
+                }
+            })
+        });
+        //------------------------------------
+
+
+        //Carrega todos os Rooms disponiveis
+        $.ajax({
+            url: "php/roomlist",
+            dataType: 'json',
+
+            success: function(data) {
+                $.each(data, function(index, value) {
+                    $("#roomlist").append('<li class="ui-widget-content" id="' + value + '">' + value + '</li>');
+                })
+            }
+        });
+    });
+</script>
+
+</html>
